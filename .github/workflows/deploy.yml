@@ -29,11 +29,11 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: nghialio/testdeploy-app:latest
 
-      # 🔎 Test secret & network
-      - name: Test Vultr Host
+      # 🔎 Test SSH port (chắc chắn port 22 mở)
+      - name: Test Vultr SSH Port
         run: |
-          echo "Testing SSH host..."
-          ping -c 3 ${{ secrets.VULTR_HOST }}
+          echo "Testing SSH port..."
+          nc -zv ${{ secrets.VULTR_HOST }} 22
 
       # 👉 Start ssh-agent để dùng private key
       - name: Start ssh-agent
