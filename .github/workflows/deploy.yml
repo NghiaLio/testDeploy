@@ -2,50 +2,57 @@ name: Deploy to Vultr
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: nghialio/testdeploy-app:latest
-
-      # 🔎 Test SSH port (chắc chắn port 22 mở)
-      - name: Test Vultr SSH Port
+      - name: Build & Push Docker Image
         run: |
-          echo "Testing SSH port..."
-          nc -zv ${{ secrets.VULTR_HOST }} 22
-
-      # 👉 Start ssh-agent để dùng private key
-      - name: Start ssh-agent
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: |
-            ${{ secrets.VULTR_SSH_KEY }}
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/testdeploy-app:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/testdeploy-app:latest
 
       - name: Deploy on Vultr
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VULTR_USER }}@${{ secrets.VULTR_HOST }} << 'EOF'
+          set -e
+          echo ">>> Starting deploy on server..."
+
+          # Tạo thư mục ứng dụng nếu chưa có
+          mkdir -p ~/myapp
+
+          # Ghi file docker-compose.prod.yml trực tiếp
+          cat > ~/myapp/docker-compose.prod.yml <<EOL
+          version: "3.8"
+          services:
+            app:
+              image: ${{ secrets.DOCKER_USERNAME }}/testdeploy-app:latest
+              container_name: myapp_container
+              restart: always
+              ports:
+                - "80:8080"
+          EOL
+
           cd ~/myapp
+
+          echo ">>> Pulling latest image..."
           docker compose -f docker-compose.prod.yml pull
+
+          echo ">>> Restarting container..."
           docker compose -f docker-compose.prod.yml up -d
+
+          echo ">>> Show last 50 logs"
+          docker compose -f docker-compose.prod.yml logs --tail=50
           EOF
