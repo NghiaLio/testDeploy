@@ -29,15 +29,17 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: nghialio/testdeploy-app:latest
 
-      # 👉 Giải mã private key có passphrase sang key tạm (không passphrase)
+      # 👉 Giải mã private key OpenSSH (ED25519/ECDSA) có passphrase sang bản tạm không passphrase
       - name: Prepare SSH key
         run: |
-          echo "${{ secrets.VULTR_SSH_KEY }}" > id_rsa.enc
+          echo "${{ secrets.VULTR_SSH_KEY }}" > id_key.enc
           echo "${{ secrets.VULTR_SSH_PASSPHRASE }}" > pass.txt
-          openssl rsa -in id_rsa.enc -passin file:pass.txt -out id_rsa
-          chmod 600 id_rsa
+          # remove passphrase -> tạo key mới không có pass
+          ssh-keygen -p -f id_key.enc -m PEM -N "" -P $(cat pass.txt)
+          mv id_key.enc id_key
+          chmod 600 id_key
           eval "$(ssh-agent -s)"
-          ssh-add id_rsa
+          ssh-add id_key
 
       - name: Deploy on Vultr
         run: |
