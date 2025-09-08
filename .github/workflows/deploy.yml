@@ -29,13 +29,18 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: nghialio/testdeploy-app:latest
 
-      # 👉 Chuẩn bị SSH key (không có passphrase)
-      - name: Prepare SSH key
+      # 🔎 Test secret & network
+      - name: Test Vultr Host
         run: |
-          echo "${{ secrets.VULTR_SSH_KEY }}" > id_key
-          chmod 600 id_key
-          eval "$(ssh-agent -s)"
-          ssh-add id_key
+          echo "Testing SSH host..."
+          ping -c 3 ${{ secrets.VULTR_HOST }}
+
+      # 👉 Start ssh-agent để dùng private key
+      - name: Start ssh-agent
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: |
+            ${{ secrets.VULTR_SSH_KEY }}
 
       - name: Deploy on Vultr
         run: |
