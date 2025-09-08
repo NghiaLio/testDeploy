@@ -27,15 +27,17 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: nghialio/testdeploy-app:latest   # đổi cho đúng
+          tags: nghialio/testdeploy-app:latest
 
-      # 👉 Sử dụng ssh-agent để load private key có passphrase
-      - name: Start ssh-agent
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: |
-            ${{ secrets.VULTR_SSH_KEY }}
-          passphrase: ${{ secrets.VULTR_SSH_PASSPHRASE }}
+      # 👉 Giải mã private key có passphrase sang key tạm (không passphrase)
+      - name: Prepare SSH key
+        run: |
+          echo "${{ secrets.VULTR_SSH_KEY }}" > id_rsa.enc
+          echo "${{ secrets.VULTR_SSH_PASSPHRASE }}" > pass.txt
+          openssl rsa -in id_rsa.enc -passin file:pass.txt -out id_rsa
+          chmod 600 id_rsa
+          eval "$(ssh-agent -s)"
+          ssh-add id_rsa
 
       - name: Deploy on Vultr
         run: |
