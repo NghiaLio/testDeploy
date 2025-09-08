@@ -29,15 +29,10 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: nghialio/testdeploy-app:latest
 
-      # 👉 Giải mã private key OpenSSH (ED25519/ECDSA) có passphrase sang bản tạm không passphrase
+      # 👉 Chuẩn bị SSH key (không có passphrase)
       - name: Prepare SSH key
         run: |
-          echo "${{ secrets.VULTR_SSH_KEY }}" > id_key.enc
-          chmod 600 id_key.enc
-          echo "${{ secrets.VULTR_SSH_PASSPHRASE }}" > pass.txt
-          # remove passphrase -> tạo key mới không có pass
-          ssh-keygen -p -f id_key.enc -m PEM -N "" -P $(cat pass.txt)
-          mv id_key.enc id_key
+          echo "${{ secrets.VULTR_SSH_KEY }}" > id_key
           chmod 600 id_key
           eval "$(ssh-agent -s)"
           ssh-add id_key
