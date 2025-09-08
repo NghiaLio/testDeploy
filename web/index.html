@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Alignment Tool - Batch Processing</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎵 Audio Alignment Tool</h1>
+            <p>Upload nhiều file audio và transcript để thực hiện alignment hàng loạt</p>
+        </header>
+
+        <main>
+            <form id="uploadForm" class="upload-form">
+                <div class="file-group">
+                    <label for="audioFiles" class="file-label">
+                        <span class="label-text">📁 Chọn nhiều file âm thanh</span>
+                        <input type="file" id="audioFiles" name="audio" accept=".wav,.mp3,.flac,.m4a,.ogg,.oga" multiple required>
+                        <span class="file-info">Hỗ trợ: WAV, MP3, FLAC, M4A, OGG (có thể chọn nhiều file)</span>
+                    </label>
+                </div>
+
+                <div class="file-group">
+                    <label for="transcriptFiles" class="file-label">
+                        <span class="label-text">📄 Chọn nhiều file transcript</span>
+                        <input type="file" id="transcriptFiles" name="transcription" accept=".txt,.lab" multiple required>
+                        <span class="file-info">Hỗ trợ: TXT, LAB (có thể chọn nhiều file)</span>
+                    </label>
+                </div>
+
+                <div class="batch-controls">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="batchMode" checked>
+                        <span>🔄 Chế độ xử lý hàng loạt</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="autoMatch" checked>
+                        <span>🔗 Tự động ghép cặp file (theo tên)</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span class="btn-text">Thực hiện Alignment Hàng Loạt</span>
+                    <span class="loading-spinner" id="loadingSpinner"></span>
+                </button>
+            </form>
+
+            <div class="file-preview" id="filePreview" style="display: none;">
+                <h3>📋 Danh sách Files đã chọn</h3>
+                <div class="file-list" id="fileList"></div>
+            </div>
+
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Đang xử lý...</div>
+                <div class="batch-progress" id="batchProgress" style="display: none;">
+                    <div class="current-file" id="currentFile">Đang xử lý: file1.wav</div>
+                    <div class="file-counter" id="fileCounter">1/5 files</div>
+                </div>
+            </div>
+
+            <div class="result-container" id="resultContainer">
+                <h3>📊 Kết quả Xử lý Hàng Loạt</h3>
+                <div class="batch-summary" id="batchSummary" style="display: none;">
+                    <div class="summary-stats">
+                        <span class="stat-item">✅ Thành công: <span id="successCount">0</span></span>
+                        <span class="stat-item">❌ Thất bại: <span id="failureCount">0</span></span>
+                        <span class="stat-item">⏳ Đang xử lý: <span id="pendingCount">0</span></span>
+                    </div>
+                </div>
+                <div class="result-content" id="resultContent"></div>
+                <div class="batch-actions" id="batchActions" style="display: none;">
+                    <button class="download-btn" id="downloadAllBtn">
+                        📥 Tải xuống Tất cả Timestamp JSON
+                    </button>
+                    <button class="download-btn" id="downloadZipBtn">
+                        📦 Tải xuống ZIP (Tất cả files)
+                    </button>
+                </div>
+            </div>
+
+            <div class="error-container" id="errorContainer">
+                <h3>❌ Lỗi</h3>
+                <div class="error-content" id="errorContent"></div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Powered by MFA (Montreal Forced Alignment) - Batch Processing Mode</p>
+        </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
