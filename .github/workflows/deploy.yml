@@ -33,6 +33,7 @@ jobs:
       - name: Prepare SSH key
         run: |
           echo "${{ secrets.VULTR_SSH_KEY }}" > id_key.enc
+          chmod 600 id_key.enc
           echo "${{ secrets.VULTR_SSH_PASSPHRASE }}" > pass.txt
           # remove passphrase -> tạo key mới không có pass
           ssh-keygen -p -f id_key.enc -m PEM -N "" -P $(cat pass.txt)
