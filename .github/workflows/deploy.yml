@@ -35,18 +35,16 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.VULTR_HOST }} >> ~/.ssh/known_hosts
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Debug SSH Connection
         run: |
-          ssh -v -o StrictHostKeyChecking=no <secrets.VULTR_USER>@<VULTR_HOST> whoami
+          ssh -v -o StrictHostKeyChecking=no ${{ secrets.VULTR_USER }}@${{ secrets.VULTR_HOST }} whoami
         continue-on-error: true
 
       - name: Deploy to Vultr
         run: |
-          ssh -o StrictHostKeyChecking=no <secrets.VULTR_USER>@<VULTR_HOST> << 'EOF'
-            cd ~/myapp
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VULTR_USER }}@${{ secrets.VULTR_HOST }} << 'EOF'
+          cd ~/myapp
+          docker compose -f docker-compose.prod.yml pull
+          docker compose -f docker-compose.prod.yml up -d
           EOF
